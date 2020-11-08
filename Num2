@@ -1,0 +1,201 @@
+//Daniel Yoh 
+//CSCI 313-22 MW 1:40PM - 2:55PM
+//#1: Comment ALL of the code in the file “stack linked list.txt” and “postfix.txt"
+
+
+//***********************************************************
+// Author: D.S. Malik
+//
+// Program: Postfix Calculator  
+// This program evaluates postfix expressions.
+//***********************************************************
+  
+#include <iostream>  // Allows for input/output streams (cout, showpoint, fixed, etc)
+#include <iomanip>   // Allows for operations on iostream objects (such as setprecision)
+#include <fstream>   // Allows files to be opened and written to
+#include "mystack.h" // Includes the code from "mystack.h" header file
+ 
+using namespace std; // Typing 'std::' gets pretty tiring
+// Function declarations
+void evaluateExpression(ifstream& inpF, ofstream& outF,     // Function for evaluating expression to convert to postfix
+                        stackType<double>& stack,
+                        char& ch, bool& isExpOk);
+void evaluateOpr(ofstream& out, stackType<double>& stack,   // Function that evaluates operators
+                 char& ch, bool& isExpOk);
+void discardExp(ifstream& in, ofstream& out, char& ch);     // Function for discarding the expression
+void printResult(ofstream& outF, stackType<double>& stack,  // Function that prints the result, the postfix expression
+                 bool isExpOk);
+// Main
+int main()
+{
+    bool expressionOk;   // Bool expressionOK is declared
+    char ch;             // Char ch is declared
+    stackType<double> stack(100);   // Makes a stack of size 100, elements are type double
+    ifstream infile;     // ifstream infile is declared
+    ofstream outfile;    // ofstream outfile is declared
+ 
+    infile.open("RpnData.txt");   // Opens the text file RpnData
+
+    if (!infile)            // If the input file cannot be opened (!infile == FALSE), the program ends
+    {
+        cout << "Cannot open the input file. "
+             << "Program terminates!" << endl;
+        return 1;
+    }
+     
+    outfile.open("RpnOutput.txt");   // Opens text file RpnOutput to write data to
+
+    outfile << fixed << showpoint;   // Sets the floatfield for outfile to fixed, then sets the showpoint flag.  
+    outfile << setprecision(2);      // Sets precision.  Floating point is represented to hundredth's place.
+ 
+    infile >> ch;                    // Reads from the file and assigns first char to ch
+    while (infile)                   // Continues reading infile to the end
+    {
+        stack.initializeStack();     // Calls 'initializeStack', which empties the stack
+        expressionOk = true;         // Sets expressionOK to true
+        outfile << ch;               // Writes the char to outfile RpnOutput
+
+        evaluateExpression(infile, outfile, stack, ch,  // Calls evaluateExpression and passes in parameters
+                           expressionOk);
+        printResult(outfile, stack, expressionOk);     // Calls printResult and passes in parameters.  Prints the resulting postfix expression.
+        infile >> ch; //begin processing the next expression
+    } //end while 
+
+    infile.close();      // Closes RpnData
+    outfile.close();     // Closes RpnOutput
+
+    return 0;            // End of program
+
+} //end main
+
+
+void evaluateExpression(ifstream& inpF, ofstream& outF, stackType<double>& stack,char& ch, bool& isExpOk) // Passes by reference so changes affect the original parameter
+{
+    double num;    // Declares new double num
+
+    while (ch != '=')   // While char is not '='
+    {
+        switch (ch)    // Switch case statement, takes in ch
+        {
+        case '#':     // For if char = a number
+            inpF >> num;          // Reads from input file into num
+            outF << num << " ";   // Sends data (num) into output file
+            if (!stack.isFullStack())   // If the stack is not full,
+                stack.push(num);        // push num into it
+            else              // If stack is full
+            {
+                cout << "Stack overflow. "               // Explains what 
+                     << "Program terminates!" << endl;  // went wrong.  Stack should not be full.
+                exit(0);  //exit the program
+            }
+
+            break;   // Breaks out of the switch case loop
+        default: //  case if ch != '#' 
+            evaluateOpr(outF, stack, ch, isExpOk);  // Default case is to call evaluateOpr
+        }//end switch
+
+        if (isExpOk) //if no error
+        {
+            inpF >> ch;   // Write next char from input file into ch
+            outF << ch;   // Write ch's new value into the output file
+
+            if (ch != '#')   // If the current char does not equal a number, 
+                outF << " "; // then output a space to outF file
+        }
+        else 
+            discardExp(inpF, outF, ch);   // Else if there is an error, then discard the expression
+    } //end while (!= '=')
+} //end evaluateExpression
+
+
+void evaluateOpr(ofstream& out, stackType<double>& stack,
+              char& ch, bool& isExpOk)
+{
+    double op1, op2;     // Two doubles op1 and op2 are declared
+
+    if (stack.isEmptyStack())        // If the stack is empty, has no elements in it, 
+    {
+        out << " (Not enough operands)";   // Send to output file " (Not enough operands)"
+        isExpOk = false;                  // The expression is not ok, so set isExpOk to false.
+    }
+    else                             // If the stack is not empty,
+    {
+        op2 = stack.top();          // Set op2 equal to the top of the stack
+        stack.pop();                // Pops the stack, removing the top element
+
+        if (stack.isEmptyStack())   // Same as above, checks if stack is empty, 
+        {
+            out << " (Not enough operands)"; // sends to output file,
+            isExpOk = false;                // and sets isExpOk to false.
+        }
+        else                       // else if stack isn't empty, then 
+        {
+            op1 = stack.top();     // sets op1 equal to top of the stack,
+            stack.pop();          // pops the top of the stack.
+
+            switch (ch)           // Switch case statement.  Takes in ch.
+            {
+            case '+':             // If the operation is addition
+                stack.push(op1 + op2);  // pushes the sum of the two doubles op1 and op2 to the top of the stack
+                break;
+            case '-':              // If the operation is subtraction
+                stack.push(op1 - op2);  // pushes op1 - op2 to the top of the stack
+                break;
+            case '*':              // If the operation is multiplication
+                stack.push(op1 * op2); // pushes product of op1 and op2 to top of stack
+                break; 
+            case '/':              // If the operation is division
+                if (op2 != 0)      // checks if op2 is not equal to 0 so it doesn't divide by 0
+                    stack.push(op1 / op2);  // pushes op1/op2 to the top of the stack
+                else               // If op2 does equal 0, then
+                {
+                    out << " (Division by 0)"; // sends to output file "Division by 0" 
+                    isExpOk = false;            // Expression isn't okay, so sets isExpOk to false.
+                }
+                break;        // Breaks out of the switch-case statement
+            default:      // Default case (neither num or opr):
+                out << " (Illegal operator)"; // Sends string to output file
+                isExpOk = false;             // Expression isn't ok, sets isExpOk to neutral
+            }//end switch
+        } //end else
+    } //end else
+} //end evaluateOpr
+
+
+void discardExp(ifstream& in, ofstream& out, char& ch)  // Discard expression function
+{
+    while (ch != '=')  // While char is not equal to '='
+    {
+        in.get(ch);   // Gets new char from input file
+        out << ch;   // Writes value of char to out
+    }
+} //end discardExp
+
+void printResult(ofstream& outF, stackType<double>& stack,  // Function for printing result of the postfix expression
+                 bool isExpOk)
+{
+    double result;     // Makes new double named result
+
+    if (isExpOk) //if no error, print the result
+    {
+        if (!stack.isEmptyStack())         // If stack is not empty
+        { 
+            result = stack.top();         // Value of the stack top is assigned to result
+            stack.pop();                  // Top of stack is removed
+
+            if (stack.isEmptyStack())    // Checks if stack is empty
+                outF << result << endl;  // If so, writes the result to the output file
+            else                         // If stack isn't empty,
+                outF << " (Error: Too many operands)" << endl; // writes this string to output file
+        } //end if
+        else                             // If stack is empty, 
+            outF << " (Error in the expression)" << endl; // writes this string to output file
+    }
+    else            // If expression is not ok, 
+        outF << " (Error in the expression)" << endl; // there is an error.  Writes this string to output file. 
+
+    outF << "_________________________________"      // Writes this long line to output file, then two endl's.  
+         << endl << endl;
+} //end printResult
+
+'+
