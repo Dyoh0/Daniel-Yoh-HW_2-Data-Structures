@@ -63,7 +63,7 @@ void stackChange(stack<int> &x, int pos, int value) {
 /*
 template <class Type>  
 void stackType<Type>::stackPrint (const stackType<Type>& otherStack) {
-    temp stack;
+    stacktype<Type> temp;
     int count = 1;
 
     while (!otherStack.isEmptyStack() ) {
@@ -82,7 +82,7 @@ void stackType<Type>::stackPrint (const stackType<Type>& otherStack) {
 
 template <class Type>
 void stackType<Type>::stackChange (const stackType<Type>& otherStack, int pos, int value) {
-    temp stack;
+    stacktype<Type> temp;
     int size = otherStack.size();
 
     for (int i = size; i >= pos; i--) { 
