@@ -1,0 +1,100 @@
+t/*
+Daniel Yoh
+CSCI 313-22 MW 1:40PM - 2:55PM
+#4: Create your own stack functions to do the following:
+a. List all the elements in the stack
+b. Iterate through the stack and change one of the values based on its position
+*/
+
+#include <iostream>
+#include <stack>
+
+using namespace std;
+
+void stackPrint(stack<int> x);  // List all the elements in the stack
+void stackChange(stack<int> &x, int pos, int value); // Changes a stack value based on position
+
+int main() {   
+    stack<int> x;  
+    for (int i = 0; i < 10; i++) x.push(i);  // Fills stack with numbers to test functions
+    stackPrint(x);            // Prints stack
+    stackChange(x, 4, 20);    // Changes stack
+    cout << "\n" << "After Change:" << "\n";
+    stackPrint(x);            // Shows stack with new value
+    return 0;
+}
+
+void stackPrint(stack<int> x) {
+    stack<int> temp;    // Creates temporary stack to copy contents of original stack to
+    int count = 1;      // Iterator
+
+    while (!x.empty() ) {     // While stack is not empty
+        temp.push(x.top() );  // Pushes the top of the original stack into the temp stack
+        x.pop();              // Removes top element of the original stack
+    }                         // Temp stack will have contents of original stack in reverse order so we can refill later
+    
+    while (!temp.empty() ) {      // While the temporary stack isn't empty
+        int tempTop = temp.top(); // Set an int equal to the top of the temp stack
+        temp.pop();               // Remove top of the temp stack
+        cout << "#" << count << ": " << tempTop << "\n";  // Lists the stack elements in order
+        count++;                  // Increments the counter for each element in the stack
+        x.push(tempTop);          // Push temp int into the original stack, refilling its original elements
+    }
+};
+
+void stackChange(stack<int> &x, int pos, int value) {
+    stack<int> temp;            // Temporary stack
+    int size = x.size();        // Passes in size of original stack
+
+    for (int i = size; i >= pos; i--) { // Uses for loop to traverse from top of stack towards bottom to the number in the list the user wants changed
+        temp.push(x.top());            // Pushes top of original stack into temp stack
+        x.pop();                       // Removes top element of original stack
+    }
+    x.push(value);    // Inserts new value
+
+    for (int i = size - 1; i >= pos; i--) {  // This for loop fills the rest of the original stack
+        temp.pop();                     // Removes top of the temp stack
+        int tempTop = temp.top();       // Sets an int equal to the new top of the temp stack
+        x.push(tempTop);                // Pushes temp int into original stack, refilling its original elements
+    }
+};
+
+
+/*
+template <class Type>  
+void stackType<Type>::stackPrint (const stackType<Type>& otherStack) {
+    temp stack;
+    int count = 1;
+
+    while (!otherStack.isEmptyStack() ) {
+        temp.push(otherStack.top());
+        otherStack.pop();
+    }
+
+    while (!temp.isEmptyStack()) {
+        int tempTop = temp.top();
+        cout << "#" << count << ": " << tempTop << "\n";
+        count++;
+        temp.pop();
+        otherStack.push(tempTop);
+    }
+} 
+
+template <class Type>
+void stackType<Type>::stackChange (const stackType<Type>& otherStack, int pos, int value) {
+    temp stack;
+    int size = otherStack.size();
+
+    for (int i = size; i >= pos; i--) { 
+        temp.push(otherStack.top());
+        otherStack.pop();
+    }
+    otherStack.push(value);   
+
+    for (int i = size - 1; i >= pos; i--) { 
+        temp.pop();
+        int tempTop = temp.top();
+        otherStack.push(tempTop);
+    }
+}
+*/
