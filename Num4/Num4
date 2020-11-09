@@ -1,0 +1,29 @@
+/*Daniel Yoh
+CSCI 313-22 MW 1:40PM - 2:55PM
+#4: Create your own stack functions to do the following:
+a. List all the elements in the stack
+b. Iterate through the stack and change one of the values based on its position
+*/
+
+#include <iostream>
+#include "myStack.h"     // Code for array stack 
+
+using namespace std;
+
+int main() {
+	int size = 15;		
+
+	stackType<int> a_Stack(size);   // Declares array stack
+	a_Stack.initializeStack();     // Initializes array stack
+
+	for (int i = 0; i < size; i++) a_Stack.push(i); // Fills array stack with elements
+
+	a_Stack.stackPrint(a_Stack);   // Prints stack
+
+	a_Stack.stackChange(a_Stack, 4, 20, size);  // Changes a stack value based on position
+	cout << endl;
+	a_Stack.stackPrint(a_Stack);  // Prints changed stack
+
+	
+	return 0;
+}
