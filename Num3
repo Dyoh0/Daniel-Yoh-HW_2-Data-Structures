@@ -1,0 +1,65 @@
+/*Daniel Yoh 
+CSCI 313-22 MW 1:40PM - 2:55PM
+#3: Test a stack's speed (with millions of operations) as to which is faster: an array based stack or a linked list based stack
+*/
+
+#include <iostream>
+#include "myStack.h"     // Takes code for array stack and
+#include "linkedStack.h" // linked list stack to use
+#include <chrono>				  // For measuring
+using namespace std::chrono;     // execution time 
+using namespace std;
+
+int aS_time(stackType<int>& x, int size);         // Testing and measuring time for array stack operations
+int lS_time(linkedStackType<int>& x, int size);   // Testing and measuring time for linked list stack operations
+
+int main() {
+	int theres_probably_a_better_way_to_do_this;    // Int to decide which of the 3 sizes to use later
+	int size = 1000000;						// Three different sizes for the stacks, in the millions.
+	int biggerSize = 5000000;					
+	int biggererSize = 10000000;			
+
+	cout << "Array Stack Time       Linked List Stack Time\n";   // Shows which execution time is which stack's
+
+	for (int i = 0; i <= 2; i++) {
+		if (i == 0) theres_probably_a_better_way_to_do_this = size;               // Uses the for loop counter so each
+		else if (i == 1) theres_probably_a_better_way_to_do_this = biggerSize;    // of the three sizes can be passed into
+		else theres_probably_a_better_way_to_do_this = biggererSize;			  // the functions
+
+		stackType<int> a_Stack(theres_probably_a_better_way_to_do_this);   // Declares array stack
+		a_Stack.initializeStack();     // Initializes array stack
+		linkedStackType<int> l_Stack;  // Declares linked list stack
+		l_Stack.initializeStack();    // Initializes linked list stack
+
+		int aS_T = aS_time(a_Stack, theres_probably_a_better_way_to_do_this);  // Calls function for measuring array stack operations time
+		int lS_T = lS_time(l_Stack, theres_probably_a_better_way_to_do_this);  // Calls function for measuring linked list stack operations time 
+
+		cout << aS_T << " milliseconds          " << lS_T << " milliseconds";  // There's a bunch of spaces so the results line up with the earlier cout statement
+		if (aS_T < lS_T) cout << "          Array stack is faster\n";		   // If statements that check which stack is faster 
+		else if (aS_T > lS_T) cout << "          Linked List stack is faster\n";
+		else cout << "Somehow, someway, these two stacks are exactly the same speed.  I have no idea how this happened.  This probably shouldn't be happening.";
+	}
+	return 0;
+}
+
+int aS_time(stackType<int>& x, int size) {
+	auto start = high_resolution_clock::now(); 
+
+	for (int i = 0; i < size; i++) x.push(i);
+	for (int i = 0; i < size; i++) x.pop();
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	return duration.count();
+};
+
+int lS_time(linkedStackType<int>& x, int size) {
+	auto start = high_resolution_clock::now();
+
+	for (int i = 0; i < size; i++) x.push(i);
+	for (int i = 0; i < size; i++) x.pop();
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<milliseconds>(stop - start);
+	return duration.count();
+};
